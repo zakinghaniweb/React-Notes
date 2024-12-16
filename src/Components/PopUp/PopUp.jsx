@@ -3,12 +3,29 @@ import './PopUp.css'
 import { IoIosColorPalette } from 'react-icons/io'
 import { FaArrowDown, FaEyeDropper } from 'react-icons/fa'
 import { useState } from 'react'
+import { getDatabase, push, ref, set } from "firebase/database";
 
-const PopUp = ({showpopup, popclose}) => {
+const PopUp = ({showpopup, popclose, popclear}) => {
+    const db = getDatabase();
     const [noteData,setNoteData] = useState({noteName: "",noteDetails: "",noteError: ""})
     const handleSave = ()=>{
         if (!noteData.noteName) {
-            setNoteData((prev)=>({...prev,noteError:"Please fill up the inputs"}))
+            setNoteData((prev)=>({...prev,noteError:"Your Note Must Have A Title"}))
+        }
+        else if (!noteData.noteDetails) {
+            setNoteData((prev)=>({...prev,noteError:"Please Enter Some Note"}))
+        }
+        else{
+            set(push(ref(db, 'allNotes/')), {
+                noteTitle:noteData.noteName,
+                noteDetails:noteData.noteDetails
+            });
+            popclose()
+            setNoteData((prev)=>({...prev,noteName:""}))
+            setNoteData((prev)=>({...prev,noteDetails:""}))
+            setNoteData((prev)=>({...prev,noteError:""}))
+            document.querySelector(".noteName").value = ""
+            document.querySelector(".noteDetails").value = ""
         }
     }
 
